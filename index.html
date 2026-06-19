@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Clinical Twin — N(t) → ∂E/∂t → x(t) — Ukubona LLC</title>
+
+  <meta property="og:title" content="Clinical Twin: Nutrition → Flux → Phenotype — Ukubona LLC" />
+  <meta property="og:description" content="A state-space formulation of clinical phenomenology. Phenotype as the time-integral of deployable energetic capacity." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://abikesa.github.io/logos/assets/ukubona-light.png" />
+
+  <link rel="icon" href="https://abikesa.github.io/favicon/assets/favicon-light.ico" />
+  <link rel="icon" href="https://abikesa.github.io/favicon/assets/favicon-dark.ico" media="(prefers-color-scheme: dark)" />
+  <link rel="preload" href="https://abikesa.github.io/logos/assets/ukubona-light.png" as="image" />
+  <link rel="preload" href="https://abikesa.github.io/logos/assets/ukubona-dark.png" as="image" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300;1,9..40,400&family=DM+Mono:wght@400;500&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── TOKENS ── */
+    :root {
+      --bg0:        #0f0f0f;
+      --bg1:        #171717;
+      --bg2:        #1f1f1f;
+      --bg3:        #2a2a2a;
+      --border:     rgba(255,255,255,0.08);
+      --border-md:  rgba(255,255,255,0.14);
+      --text0:      #f2f0eb;
+      --text1:      #b8b4aa;
+      --text2:      #6e6a62;
+      --accent:     #7f77dd;
+      --accent-dim: rgba(127,119,221,0.18);
+      --accent-brd: rgba(127,119,221,0.4);
+      --coral:      #d85a30;
+      --coral-dim:  rgba(216,90,48,0.14);
+      --coral-brd:  rgba(216,90,48,0.35);
+      --teal:       #1d9e75;
+      --teal-dim:   rgba(29,158,117,0.14);
+      --teal-brd:   rgba(29,158,117,0.35);
+      --amber:      #ba7517;
+      --amber-dim:  rgba(186,117,23,0.14);
+      --amber-brd:  rgba(186,117,23,0.35);
+      --node-input:      #7f77dd;
+      --node-throughput: #1d9e75;
+      --node-output:     #d85a30;
+      --serif: 'DM Serif Display', Georgia, serif;
+      --sans:  'DM Sans', system-ui, sans-serif;
+      --mono:  'DM Mono', 'Fira Mono', monospace;
+      --radius:    8px;
+      --radius-lg: 14px;
+      --max:       740px;
+    }
+
+    [data-theme="light"] {
+      --bg0:        #f5f3ee;
+      --bg1:        #ffffff;
+      --bg2:        #f0ede6;
+      --bg3:        #e8e4db;
+      --border:     rgba(0,0,0,0.07);
+      --border-md:  rgba(0,0,0,0.13);
+      --text0:      #1a1916;
+      --text1:      #4a4740;
+      --text2:      #8a8680;
+      --accent:     #534ab7;
+      --accent-dim: rgba(83,74,183,0.10);
+      --accent-brd: rgba(83,74,183,0.30);
+      --coral:      #993c1d;
+      --coral-dim:  rgba(153,60,29,0.10);
+      --coral-brd:  rgba(153,60,29,0.28);
+      --teal:       #0f6e56;
+      --teal-dim:   rgba(15,110,86,0.10);
+      --teal-brd:   rgba(15,110,86,0.28);
+      --amber:      #854f0b;
+      --amber-dim:  rgba(133,79,11,0.10);
+      --amber-brd:  rgba(133,79,11,0.28);
+      --node-input:      #534ab7;
+      --node-throughput: #0f6e56;
+      --node-output:     #993c1d;
+    }
+
+    /* ── RESET ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; scroll-behavior: smooth; }
+    body {
+      font-family: var(--sans);
+      background: var(--bg0);
+      color: var(--text0);
+      line-height: 1.75;
+      transition: background 0.3s, color 0.3s;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── LAYOUT ── */
+    .outer { max-width: var(--max); margin: 0 auto; padding: 0 1.5rem; }
+
+    /* ── HEADER ── */
+    .site-header {
+      border-bottom: 1px solid var(--border);
+      padding: 1.1rem 0;
+      position: sticky; top: 0; z-index: 100;
+      background: var(--bg0);
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .header-inner {
+      max-width: var(--max); margin: 0 auto; padding: 0 1.5rem;
+      display: flex; align-items: center; gap: 1rem;
+    }
+    .logo-wrap { width: 36px; height: 36px; flex-shrink: 0; position: relative; }
+    .logo-wrap img {
+      width: 100%; height: 100%; object-fit: contain;
+      position: absolute; top: 0; left: 0;
+      animation: spin 120s linear infinite;
+      transition: opacity 0.35s ease;
+    }
+    .logo-light { opacity: 0; }
+    .logo-dark  { opacity: 1; }
+    [data-theme="light"] .logo-light { opacity: 1; }
+    [data-theme="light"] .logo-dark  { opacity: 0; }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+    .header-meta { flex: 1; min-width: 0; }
+    .header-meta h1 {
+      font-size: 0.875rem; font-weight: 500; letter-spacing: -0.01em;
+      color: var(--text0); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .header-meta p { font-size: 0.72rem; color: var(--text2); margin-top: 1px; }
+
+    .theme-btn {
+      background: var(--bg2); border: 1px solid var(--border-md); border-radius: 20px;
+      padding: 0.3rem 0.75rem; font-family: var(--mono); font-size: 0.7rem;
+      color: var(--text1); cursor: pointer; transition: background 0.2s, color 0.2s;
+      flex-shrink: 0; letter-spacing: 0.04em;
+    }
+    .theme-btn:hover { background: var(--bg3); color: var(--text0); }
+
+    /* ── NAV ── */
+    .nav-strip { border-bottom: 1px solid var(--border); background: var(--bg0); transition: background 0.3s, border-color 0.3s; }
+    .nav-inner {
+      max-width: var(--max); margin: 0 auto; padding: 0 1.5rem;
+      display: flex; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none;
+    }
+    .nav-inner::-webkit-scrollbar { display: none; }
+    .tab-btn {
+      background: none; border: none; border-bottom: 2px solid transparent;
+      padding: 0.75rem 1rem; font-family: var(--mono); font-size: 0.68rem;
+      letter-spacing: 0.08em; text-transform: uppercase; color: var(--text2);
+      cursor: pointer; white-space: nowrap; transition: color 0.2s, border-color 0.2s;
+    }
+    .tab-btn:hover { color: var(--text1); }
+    .tab-btn.active { color: var(--text0); border-bottom-color: var(--accent); }
+
+    /* ── MAIN ── */
+    main { padding: 3rem 0 6rem; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    .section { margin-bottom: 2.5rem; }
+
+    /* ── TYPE ── */
+    .display {
+      font-family: var(--serif);
+      font-size: clamp(1.9rem, 5vw, 3rem);
+      line-height: 1.1; letter-spacing: -0.02em;
+      color: var(--text0); margin-bottom: 0.5rem;
+    }
+    .eyebrow {
+      font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--text2); margin-bottom: 0.75rem;
+    }
+    .lede { font-size: 1.05rem; color: var(--text1); line-height: 1.7; max-width: 58ch; }
+    h2.section-head {
+      font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--text2); margin-bottom: 1.25rem;
+      padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);
+    }
+    p { margin-bottom: 1rem; color: var(--text1); }
+    p:last-child { margin-bottom: 0; }
+    strong { color: var(--text0); font-weight: 500; }
+    em { font-style: italic; color: var(--text1); }
+    blockquote {
+      border-left: 2px solid var(--border-md); padding-left: 1.1rem;
+      margin: 1.5rem 0; color: var(--text2); font-size: 0.9rem;
+      font-style: italic; line-height: 1.65;
+    }
+
+    /* ── SIGNATURE ELEMENT: FLOW DIAGRAM ── */
+    .flow-hero {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      padding: 2.5rem 0 1.5rem;
+      overflow-x: auto;
+    }
+    .flow-node {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      min-width: 110px;
+    }
+    .node-circle {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--mono); font-size: 0.78rem;
+      font-weight: 500; letter-spacing: -0.01em;
+      border: 2px solid;
+      transition: background 0.3s, border-color 0.3s;
+      position: relative;
+    }
+    .node-circle::after {
+      content: '';
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      border: 1.5px solid;
+      opacity: 0;
+      animation: pulse-ring 2.4s ease-out infinite;
+    }
+    .node-input .node-circle {
+      background: var(--accent-dim); border-color: var(--accent-brd); color: var(--accent);
+    }
+    .node-input .node-circle::after { border-color: var(--accent); animation-delay: 0s; }
+    .node-throughput .node-circle {
+      background: var(--teal-dim); border-color: var(--teal-brd); color: var(--teal);
+    }
+    .node-throughput .node-circle::after { border-color: var(--teal); animation-delay: 0.8s; }
+    .node-output .node-circle {
+      background: var(--coral-dim); border-color: var(--coral-brd); color: var(--coral);
+    }
+    .node-output .node-circle::after { border-color: var(--coral); animation-delay: 1.6s; }
+
+    @keyframes pulse-ring {
+      0%   { transform: scale(1); opacity: 0.5; }
+      70%  { transform: scale(1.35); opacity: 0; }
+      100% { opacity: 0; }
+    }
+
+    .node-label {
+      font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--text2); text-align: center;
+    }
+    .node-sublabel {
+      font-size: 0.72rem; color: var(--text1); text-align: center;
+      font-weight: 500; line-height: 1.3;
+    }
+
+    .flow-arrow {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 0.25rem; padding: 0 0.25rem; padding-bottom: 2rem;
+    }
+    .arrow-line {
+      width: 48px; height: 2px;
+      position: relative; overflow: visible;
+    }
+    .arrow-line::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, var(--border-md), var(--text2));
+    }
+    .arrow-line::after {
+      content: '';
+      position: absolute;
+      top: -4px; right: -1px;
+      width: 0; height: 0;
+      border-left: 7px solid var(--text2);
+      border-top: 4px solid transparent;
+      border-bottom: 4px solid transparent;
+    }
+    /* animated dot travelling along arrow */
+    .arrow-dot {
+      position: absolute;
+      top: -3px; left: 0;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      animation: travel 2.4s linear infinite;
+    }
+    .arrow-1 .arrow-dot { background: var(--accent); animation-delay: 0.3s; }
+    .arrow-2 .arrow-dot { background: var(--teal);  animation-delay: 1.1s; }
+    @keyframes travel {
+      0%   { left: 0;    opacity: 0; }
+      10%  { opacity: 1; }
+      90%  { opacity: 1; }
+      100% { left: calc(100% - 8px); opacity: 0; }
+    }
+    .arrow-eq {
+      font-family: var(--mono); font-size: 0.6rem; color: var(--text2);
+      white-space: nowrap;
+    }
+
+    /* ── EQ BLOCK ── */
+    .eq-block {
+      font-family: var(--mono); font-size: 0.82rem;
+      background: var(--bg2); border-left: 3px solid var(--accent-brd);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      padding: 1rem 1.25rem; overflow-x: auto;
+      color: var(--text0); line-height: 2; margin: 1.25rem 0;
+      transition: background 0.3s, border-color 0.3s;
+    }
+
+    /* ── INSIGHT ── */
+    .insight {
+      border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; margin: 1.25rem 0;
+    }
+    .insight.accent { background: var(--accent-dim); border: 1px solid var(--accent-brd); }
+    .insight.coral  { background: var(--coral-dim);  border: 1px solid var(--coral-brd); }
+    .insight.teal   { background: var(--teal-dim);   border: 1px solid var(--teal-brd); }
+    .insight.amber  { background: var(--amber-dim);  border: 1px solid var(--amber-brd); }
+    .insight-head {
+      font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.1em;
+      text-transform: uppercase; margin-bottom: 0.75rem;
+    }
+    .insight.accent .insight-head { color: var(--accent); }
+    .insight.coral  .insight-head { color: var(--coral); }
+    .insight.teal   .insight-head { color: var(--teal); }
+    .insight.amber  .insight-head { color: var(--amber); }
+    .insight p { font-size: 0.875rem; }
+
+    /* ── TERM GRID ── */
+    .term-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
+      background: var(--border); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); overflow: hidden; margin: 1.25rem 0;
+    }
+    .term-cell {
+      background: var(--bg1); padding: 1.25rem; transition: background 0.2s;
+    }
+    .term-cell:hover { background: var(--bg2); }
+    .term-glyph {
+      font-family: var(--serif); font-size: 1.6rem; line-height: 1;
+      margin-bottom: 0.35rem;
+    }
+    .term-cell.inp  .term-glyph { color: var(--accent); }
+    .term-cell.thru .term-glyph { color: var(--teal); }
+    .term-cell.out  .term-glyph { color: var(--coral); }
+    .term-cell.eps  .term-glyph { color: var(--amber); }
+    .term-name { font-size: 0.8rem; font-weight: 500; color: var(--text0); margin-bottom: 0.25rem; }
+    .term-desc { font-size: 0.75rem; color: var(--text2); line-height: 1.55; }
+
+    /* ── CLINICAL TABLE ── */
+    .clin-table {
+      width: 100%; border-collapse: collapse; font-size: 0.82rem; margin: 1.25rem 0;
+    }
+    .clin-table th {
+      font-family: var(--mono); font-size: 0.63rem; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--text2); border-bottom: 1px solid var(--border-md);
+      padding: 0.5rem 0.75rem; text-align: left; font-weight: 400;
+    }
+    .clin-table td {
+      padding: 0.65rem 0.75rem; border-bottom: 1px solid var(--border);
+      color: var(--text1); vertical-align: top;
+    }
+    .clin-table tr:last-child td { border-bottom: none; }
+    .clin-table td:first-child { font-family: var(--mono); font-size: 0.75rem; color: var(--accent); white-space: nowrap; }
+    .clin-table tr:hover td { background: var(--bg2); }
+    .neg { color: var(--coral) !important; }
+    .pos { color: var(--teal) !important; }
+    .neu { color: var(--text2) !important; }
+
+    /* ── CASE CARDS ── */
+    .case-card {
+      border: 1px solid var(--border); border-radius: var(--radius-lg);
+      overflow: hidden; margin: 1.25rem 0;
+    }
+    .case-head {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.875rem 1.25rem; border-bottom: 1px solid var(--border);
+      background: var(--bg2);
+    }
+    .case-badge {
+      font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.1em;
+      text-transform: uppercase; padding: 0.2rem 0.55rem; border-radius: 4px;
+    }
+    .case-badge.thiamine { background: var(--coral-dim); color: var(--coral); border: 1px solid var(--coral-brd); }
+    .case-badge.parkinson { background: var(--amber-dim); color: var(--amber); border: 1px solid var(--amber-brd); }
+    .case-badge.rehab { background: var(--teal-dim); color: var(--teal); border: 1px solid var(--teal-brd); }
+    .case-badge.migraine { background: var(--accent-dim); color: var(--accent); border: 1px solid var(--accent-brd); }
+    .case-badge.sd { background: var(--coral-dim); color: var(--coral); border: 1px solid var(--coral-brd); }
+    .case-title { font-size: 0.875rem; font-weight: 500; color: var(--text0); }
+    .case-body { padding: 1.25rem; background: var(--bg1); }
+    .case-body p { font-size: 0.875rem; }
+
+    /* ── DUALITY TABLE ── */
+    .duality {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
+      background: var(--border); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); overflow: hidden; margin: 1.25rem 0;
+    }
+    .duality-head {
+      display: contents;
+    }
+    .duality-cell {
+      background: var(--bg1); padding: 0.75rem 1rem;
+      font-size: 0.8rem; color: var(--text1);
+      border-bottom: 1px solid var(--border);
+      transition: background 0.2s;
+    }
+    .duality-cell:hover { background: var(--bg2); }
+    .duality-cell.label-col {
+      font-family: var(--mono); font-size: 0.7rem; color: var(--text2);
+    }
+    .duality-cell.head-mech { background: var(--bg2); font-weight: 500; color: var(--text0); font-size: 0.75rem; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.08em; }
+    .duality-cell.head-clin { background: var(--bg2); font-weight: 500; color: var(--accent); font-size: 0.75rem; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.08em; }
+
+    /* ── VERDICT ── */
+    .verdict-block {
+      background: var(--bg2); border-radius: var(--radius-lg);
+      padding: 1.75rem; margin: 2rem 0; border: 1px solid var(--border);
+    }
+    .verdict-glyph {
+      font-family: var(--serif); font-size: 3rem; color: var(--teal);
+      line-height: 1; margin-bottom: 0.75rem;
+    }
+    .verdict-block p { font-size: 0.875rem; }
+
+    /* ── FOOTER ── */
+    footer { border-top: 1px solid var(--border); padding: 2rem 0; margin-top: 3rem; }
+    footer .outer {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 1rem; flex-wrap: wrap;
+    }
+    .footer-text { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.05em; color: var(--text2); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 560px) {
+      .term-grid  { grid-template-columns: 1fr; }
+      .duality    { grid-template-columns: 1fr; }
+      .display    { font-size: 1.75rem; }
+      .flow-hero  { gap: 0; }
+      .arrow-line { width: 28px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .logo-wrap img { animation: none; }
+      .node-circle::after { animation: none; }
+      .arrow-dot { animation: none; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- HEADER -->
+  <div class="site-header">
+    <div class="header-inner">
+      <div class="logo-wrap" aria-hidden="true">
+        <img class="logo-dark"  src="https://abikesa.github.io/logos/assets/ukubona-dark.png"  alt="" />
+        <img class="logo-light" src="https://abikesa.github.io/logos/assets/ukubona-light.png" alt="" />
+      </div>
+      <div class="header-meta">
+        <h1>Clinical Twin — N(t) → ∂E/∂t → x(t)</h1>
+        <p>Ukubona LLC · State-space formulation of clinical phenomenology</p>
+      </div>
+      <button class="theme-btn" onclick="toggleTheme()" aria-label="Toggle theme">
+        <span id="theme-label">light</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- NAV -->
+  <div class="nav-strip">
+    <div class="nav-inner">
+      <button class="tab-btn active" data-tab="axiom">Axiom</button>
+      <button class="tab-btn" data-tab="input">Input</button>
+      <button class="tab-btn" data-tab="throughput">Throughput</button>
+      <button class="tab-btn" data-tab="output">Output</button>
+      <button class="tab-btn" data-tab="cases">Clinical Cases</button>
+      <button class="tab-btn" data-tab="notation">Notation</button>
+    </div>
+  </div>
+
+  <main>
+    <div class="outer">
+
+      <!-- ═══ AXIOM ═══ -->
+      <section class="tab-panel active" id="tab-axiom">
+
+        <div class="section">
+          <p class="eyebrow">Ukubona LLC · Clinical Digital Twin · Axiom II</p>
+          <h2 class="display">Phenotype is not<br>a state. It is<br>a trajectory.</h2>
+          <p class="lede">A clinical phenotype is the time-integral of deployable energetic capacity, perturbed by latent drift and anchored by baseline reserve. The input was never unknown — it was always nutrition.</p>
+        </div>
+
+        <!-- SIGNATURE ELEMENT: animated flow -->
+        <div class="section">
+          <h2 class="section-head">The pipeline</h2>
+          <div class="flow-hero">
+
+            <div class="flow-node node-input">
+              <div class="node-circle">N(t)</div>
+              <div class="node-label">Input</div>
+              <div class="node-sublabel">Nutrition</div>
+            </div>
+
+            <div class="flow-arrow arrow-1">
+              <div class="arrow-line">
+                <div class="arrow-dot"></div>
+              </div>
+              <div class="arrow-eq">substrate</div>
+            </div>
+
+            <div class="flow-node node-throughput">
+              <div class="node-circle">∂E/∂t</div>
+              <div class="node-label">Throughput</div>
+              <div class="node-sublabel">Metabolic flux</div>
+            </div>
+
+            <div class="flow-arrow arrow-2">
+              <div class="arrow-line">
+                <div class="arrow-dot"></div>
+              </div>
+              <div class="arrow-eq">integral</div>
+            </div>
+
+            <div class="flow-node node-output">
+              <div class="node-circle">x(t)</div>
+              <div class="node-label">Output</div>
+              <div class="node-sublabel">Phenotype</div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-head">The full equation</h2>
+          <div class="eq-block">
+N(t)  →  ∂E/∂t  →  (E, x)<br><br>
+(E, x)  =  ∫ Eₓ dt  +  εₓ·t  +  Cₓ<br><br>
+or equivalently:<br><br>
+x(t)  =  x₀  +  ∫₀ᵗ Eₓ(τ) dτ  +  εₓ·t
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-head">The four terms</h2>
+          <div class="term-grid">
+            <div class="term-cell inp">
+              <div class="term-glyph">N(t)</div>
+              <div class="term-name">Nutritional input</div>
+              <div class="term-desc">Biochemical substrates available for energy transduction. Sets the boundary condition on metabolic possibility. Not merely calories — micronutrients are often the binding constraint.</div>
+            </div>
+            <div class="term-cell thru">
+              <div class="term-glyph">∂E/∂t</div>
+              <div class="term-name">Metabolic flux</div>
+              <div class="term-desc">Rate at which nutritional inputs convert to deployable energy. Not total energy stored — metabolic throughput capacity. Collapses in deficiency; recovers in refeeding.</div>
+            </div>
+            <div class="term-cell out">
+              <div class="term-glyph">∫Eₓdt</div>
+              <div class="term-name">Accumulated function</div>
+              <div class="term-desc">The time-integral of deployable energy at coordinate x. Clinically: words spoken, distance walked, cardiac contractions sustained, neural computations executed.</div>
+            </div>
+            <div class="term-cell eps">
+              <div class="term-glyph">εₓ·t</div>
+              <div class="term-name">Drift term</div>
+              <div class="term-desc">Residual trajectory not explained by nutrition alone. Aging (ε &lt; 0), training (ε &gt; 0), neurodegeneration (ε ≪ 0), episodic disease (oscillatory ε). The FGT error term.</div>
+            </div>
+          </div>
+          <p style="font-size:0.8rem; color: var(--text2); margin-top: 0.5rem; font-family: var(--mono);">Cₓ = initial condition · baseline reserve · genetics · premorbid capacity</p>
+        </div>
+
+        <div class="section">
+          <h2 class="section-head">The founding insight</h2>
+          <blockquote>
+            Pathology often reflects not the absence of structure, but a reduction in allowable energetic throughput within an otherwise structurally intact system.
+          </blockquote>
+          <p>This directly extends β₄VₐF: intact effector, gain-control failure, no structural lesion. The clinical twin generalizes that principle from vascular smooth muscle to all energy-transducing systems. Thiamine deficiency is β₄VₐF of the mitochondrion.</p>
+        </div>
+
+      </section>
+
+      <!-- ═══ INPUT ═══ -->
+      <section class="tab-panel" id="tab-input">
+
+        <div class="section">
+          <p class="eyebrow">Term 1 · N(t)</p>
+          <h2 class="display">The input<br>was always<br>nutrition.</h2>
+          <p class="lede">N(t) is not food. It is the availability of biochemical substrates required for energy transduction — and the micronutrients are usually the binding constraint, not the macronutrients.</p>
+        </div>
+
+        <div class="section">
+          <h2 class="section-head">What N(t) actually contains</h2>
+          <table class="clin-table">
+            <thead><tr><th>Substrate class</th><th>Key members</th><th>Bottleneck domain</th></tr></thead>
+            <tbody>
+              <tr><td>Macronutrients</td><td>Glucose, fatty acids, amino acids</td><td>ATP generation, protein repair</td></tr>
+              <tr><td>B vitamins</td><td>Thiamine (B₁), Riboflavin (B₂), Niacin (B₃), Pantothenate (B₅), B₁₂</td><td>Mitochondrial flux, myelin integrity</td></tr>
+              <tr><td>Minerals</td><td>Magnesium, Iron, Copper, Zinc</td><td>Excitable tissues, endurance, enzymatic cofactors</td></tr>
+              <tr><td>Coenzyme precursors</td><td>CoQ10, NAD⁺, FAD</td><td>Electron transport chain</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="section">
+          <h2 class="section-head">N(t) as boundary condition</h2>
+          <div class="insight accent">
+            <div class="insight-head">The binding constraint principle</div>
+            <p>N(t) does not determine phenotype directly. It determines the <em>permissible range</em> of ∂E/∂t. A person with adequate calories but thiamine deficiency has large N(macronutrient) and near-zero N(B₁) — and the mitochondrial electron transport chain gates on the deficient term. The system is limited by its least-available substrate, not its most-available one.</p>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-head">Nutrient bottleneck → functional output sensitivity</h2>
+          <table class="clin-table">
+            <thead><tr><th>Deficient nutrient</th><th>System most sensitive</th><th>Clinical presentation</th></tr></thead>
+            <tbody>
+              <tr><td>Thiamine (B₁)</td><td>Peripheral nerves, basal ganglia, myocardium</td><td>Wernicke's, beriberi, cardiomyopathy</td></tr>
+              <tr><td>Iron</td><td>Muscle endurance, cognition</td><td>Fatigue, impaired sustained attention</td></tr>
+              <tr><td>B₁₂</td><td>Myelin-dependent pathways</td><td>Subacute combined degeneration</td></tr>
+              <tr><td>Magnesium</td><td>Excitable tissues</td><td>Cramps, arrhythmia, migraine</td></tr>
+              <tr><td>Protein</td><td>Global repair and maintenance</td><td>Sarcopenia, impaired wound healing</td></tr>
+            </tbody>
+          </table>
+          <p>Each row is a different coordinate x in the output equation. The same nutritional input maps to different functional outputs depending on which tissue is most sensitive to that substrate's absence.</p>
+        </div>
+
+      </section>
+
+      <!-- ═══ THROUGHPUT ═══ -->
+      <section class="tab-panel" id="tab-throughput">
+
+        <div class="section">
+          <p class="eyebrow">Term 2 · ∂E/∂t</p>
+          <h2 class="display">Metabolic flux.<br>Not stored energy —<br>deployable rate.</h2>
+          <p class="lede">∂E/∂t is the rate at which the system converts available substrates into functional work. It is the Throughput in the clinical twin pipeline — and it is what collapses first in deficiency states, often before any structural damage accrues.</p>
+        </div>
+
+        <div class="section">
+          <h2 class="section-head">∂E/∂t across domains</h2>
+          <table class="clin-table">
+            <thead><tr><th>Domain (x)</th><th>E</th><th>∂E/∂t reads as</th></tr></thead>
+            <tbody>
+              <tr><td>Cardiac</td><td>Cardiac reserve</td><td>Rate of contractile work available above resting demand</td></tr>
+              <tr><td>Basal ganglia</td><td>Motor fluency</td><td>Rate of smooth motor program deployment</td></tr>
+              <tr><td>Phonation</td><td>Phonatory capacity</td><td>Rate of sustained vocal fold adduction available</td></tr>
+              <tr><td>Cognition</td><td>Executive bandwidth</td><td>Rate of working-memory refresh and inhibitory control</td></tr>
+              <tr><td>Muscle</td><td>ATP availability</td><td>Rate of phosphocreatine regeneration</td></tr>
+              <tr><td>Society</td><td>Institutional trust</td><td>Rate of collective coordination capacity</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="section">
+          <h2 class="section-head">The Jacobian of throughput</h2>
+          <div class="eq-block">
+J_throughput  =  ∂(∂E/∂t) / ∂N(t)<br><br>
+High thiamine  →  J large  →  flux responds to substrate<br>
+Deficiency     →  J ≈ 0    →  flux decoupled from input<br>
+Mitoch. disease→  J &lt; 0   →  substrate may worsen flux
+          </div>
+          <p>The Jacobian of throughput with respect to nutrition tells you whether adding more substrate will help. In severe mitochondrial dysfunction, it may not — or may actively worsen outcome (refeeding syndrome is J turning negative).</p>
+        </div>
+
+        <div class="section">
+          <h2 class="section-head">Throughput states</h2>
+          <table class="clin-table">
+            <thead><tr><th>State</th><th>∂E/∂t</th><th>Clinical correlate</th></tr></thead>
+            <tbody>
+              <tr><td>Adequate nutrition</td><td class="pos">High</td><td>Normal reserve, full functional deployment</td></tr>
+              <tr><td>Mild deficiency</td><td class="neu">Reduced</td><td>Subclinical fatigue, reduced reserve under load</td></tr>
+              <tr><td>Severe deficiency</td><td class="neg">Collapse</td><td>Overt dysfunction — Wernicke's, beriberi</td></tr>
+              <tr><td>Refeeding</td><td class="pos">Recovery</td><td>Flux restores before structure rebuilds</td></tr>
+              <tr><td>Mitochondrial disease</td><td class="neg">Intrinsically limited</td><td>Ceiling on ∂E/∂t regardless of substrate</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="section">
+          <h2 class="section-head">Connection to β₄VₐF</h2>
+          <div class="insight teal">
+            <div class="insight-head">Throughput failure without structural lesion</div>
+            <p>The β₄VₐF category (intact effector, gain-control failure, no structural lesion) maps precisely onto the throughput layer. When ∂E/∂t collapses without any histological damage — as in thiamine deficiency neuropathy or Prinzmetal vasospasm — the lesion is in the throughput term, not in the structural compartment β₃VₐS. The clinical twin equation makes this localization explicit.</p>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ═══ OUTPUT ═══ -->
+      <section class="tab-panel" id="tab-output">
+
+        <div class="section">
+          <p class="eyebrow">Term 3 · x(t)</p>
+          <h2 class="display">Phenotype is<br>the integral.<br>Not the snapshot.</h2>
+          <p class="lede">The output equation has three terms. Each does different clinical work. Together they describe why two patients with identical blood values can diverge dramatically in functional trajectory.</p>
+        </div>
+
+        <div class="section">
+          <h2 class="section-head">The output equation decomposed</h2>
+          <div class="eq-block">
+x(t)  =  ∫₀ᵗ Eₓ(τ) dτ    ← accumulated function<br>
+       +  εₓ · t           ← drift (FGT residual)<br>
+       +  Cₓ               ← initial condition
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-head">Term 1: ∫Eₓ dt — accumulated function</h2>
+          <p>This is the time-integral of deployable energy at the specific output coordinate x. What accumulates depends on what x indexes:</p>
+          <table class="clin-table">
+            <thead><tr><th>x (coordinate)</th><th>∫Eₓ dt reads as</th></tr></thead>
+            <tbody>
+              <tr><td>Speech</td><td>Cumulative phonatory work produced over the session</td></tr>
+              <tr><td>Gait</td><td>Distance walked, work against gravity</td></tr>
+              <tr><td>Cardiac</td><td>Stroke volume integrated over time — cardiac output</td></tr>
+              <tr><td>Cognition</td><td>Problems solved, decisions made, working memory refreshed</td></tr>
+              <tr><td>Immune</td><td>Cytokines deployed, pathogens cleared</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="section">
+          <h2 class="section-head">Term 2: εₓ·t — the drift term</h2>
+          <p>This is the FGT residual — the systematic trajectory not explained by nutrition alone. Its sign and magnitude carry the clinical story:</p>
+          <table class="clin-table">
+            <thead><tr><th>εₓ value</th><th>Interpretation</th><th>Example</th></tr></thead>
+            <tbody>
+              <tr><td class="neg">ε ≪ 0</td><td>Rapid neurodegeneration</td><td>ALS, aggressive Parkinson's</td></tr>
+              <tr><td class="neg">ε &lt; 0</td><td>Aging, chronic inflammation</td><td>Sarcopenia, COPD progression</td></tr>
+              <tr><td class="neu">ε ≈ 0</td><td>Stable physiology</td><td>Healthy adult at equilibrium</td></tr>
+              <tr><td class="pos">ε &gt; 0</td><td>Training adaptation</td><td>Athletic conditioning, rehabilitation</td></tr>
+              <tr><td style="color:var(--accent); font-family:var(--mono); font-size:0.75rem;">oscillatory ε</td><td>Episodic disease</td><td>Migraine, Prinzmetal, SD flare</td></tr>
+              <tr><td style="color:var(--accent); font-family:var(--mono); font-size:0.75rem;">thresholded ε</td><td>Compensated dysfunction</td><td>Kerry Kennedy's attenuated VₐF</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="section">
+          <h2 class="section-head">Term 3: Cₓ — initial condition</h2>
+          <div class="insight amber">
+            <div class="insight-head">Constitutional reserve · β₀ in the clinical axiom</div>
+            <p>Cₓ is what you bring to the system before any nutrition arrives. It encodes genetics, developmental history, organ capacity, synaptic density, muscle mass at baseline. In the β₄VₐF notation, Cₓ ≈ β₀ — the familial motor manifold that RFK Jr. and Kerry Kennedy share. Their Cₓ are similar. Their εₓ at the VₐF coordinate diverged under decades of gradient descent on the same loss landscape.</p>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-head">The FGT connection</h2>
+          <div class="eq-block">
+ε_FGT  =  y_true − y_predicted<br>
+       =  x(t)_observed − x(t)_modelled<br><br>
+w_{t+1}  =  w_t − γ |ε_FGT|²<br><br>
+The drift term εₓ in the output equation<br>
+IS the FGT error term accumulating over time.
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ═══ CASES ═══ -->
+      <section class="tab-panel" id="tab-cases">
+
+        <div class="section">
+          <p class="eyebrow">Clinical application</p>
+          <h2 class="display">Five cases.<br>One equation.</h2>
+          <p class="lede">The clinical twin equation explains why nutritional deficiencies can manifest as apparently unrelated syndromes — because each maps to a different x coordinate with a different sensitivity to the bottleneck nutrient.</p>
+        </div>
+
+        <div class="section">
+          <h2 class="section-head">Case 1 — Thiamine deficiency (Wernicke's)</h2>
+          <div class="case-card">
+            <div class="case-head">
+              <span class="case-badge thiamine">Thiamine · B₁</span>
+              <span class="case-title">Intact neuron · collapsed throughput</span>
+            </div>
+            <div class="case-body">
+              <div class="eq-block">
+N(thiamine) → 0<br>
+∂E/∂t        → collapse at basal ganglia, mammillary bodies, cerebellum<br>
+εₓ           &lt; 0  (sustained negative drift)<br>
+x(t)         → ataxia, ophthalmoplegia, confusion<br><br>
+Reversal: thiamine repletion → ∂E/∂t recovers before structure repairs
+              </div>
+              <p>This is the canonical β₄VₐF case for metabolism: no structural lesion initially, catastrophic functional failure, reversible if caught. The neurons are intact. The electron transport chain simply has no coenzyme to turn.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-head">Case 2 — Parkinsonism</h2>
+          <div class="case-card">
+            <div class="case-head">
+              <span class="case-badge parkinson">Basal ganglia · dopamine</span>
+              <span class="case-title">Structural loss + negative drift</span>
+            </div>
+            <div class="case-body">
+              <div class="eq-block">
+N(t)   → adequate (nutritional input normal)<br>
+∂E/∂t  → reduced at motor fluency coordinate<br>
+εₓ     &lt; 0  (progressive, irreversible)<br>
+x(t)   → cumulative motor work declines monotonically<br><br>
+Contrast with thiamine: εₓ here is structural, not metabolic
+              </div>
+              <p>Parkinsonism exposes the difference between metabolic throughput failure (thiamine) and structural throughput failure (dopaminergic neuron loss). Same equation, different etiology of ∂E/∂t collapse. The clinical twin distinguishes them by the reversibility of εₓ.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-head">Case 3 — Rehabilitation / skill acquisition</h2>
+          <div class="case-card">
+            <div class="case-head">
+              <span class="case-badge rehab">Training · ε &gt; 0</span>
+              <span class="case-title">Positive drift · Cₓ expanding</span>
+            </div>
+            <div class="case-body">
+              <div class="eq-block">
+N(t)   → adequate and optimized<br>
+∂E/∂t  → high and increasing<br>
+εₓ     &gt; 0  (training adaptation)<br>
+x(t)   → cumulative function grows super-linearly<br><br>
+Cₓ also increases: baseline reserve is not fixed
+              </div>
+              <p>Rehabilitation is the positive-ε case. The initial condition Cₓ is not fixed — it can be raised by training. This is why early physiotherapy after stroke matters: the window where εₓ can be pushed positive before the negative structural drift consolidates.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-head">Case 4 — Migraine / Prinzmetal vasospasm</h2>
+          <div class="case-card">
+            <div class="case-head">
+              <span class="case-badge migraine">Oscillatory ε · β₄VₐF</span>
+              <span class="case-title">Episodic throughput collapse · intact effector</span>
+            </div>
+            <div class="case-body">
+              <div class="eq-block">
+N(t)   → normal between episodes<br>
+∂E/∂t  → episodic collapse (oscillatory)<br>
+εₓ     → oscillatory: negative during attack, recovers interictal<br>
+x(t)   → stepped decline with each attack · cumulative burden<br><br>
+VₐF criterion: intact vessel · reversible spasm · state-dependent
+              </div>
+              <p>The oscillatory ε reveals itself in x(t) as a staircase of stepped losses. Between attacks the curve is flat or slightly positive; during attacks it drops sharply. The integral accumulates both the work done and the losses absorbed.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-head">Case 5 — Spasmodic dysphonia (RFK Jr. / Kerry Kennedy)</h2>
+          <div class="case-card">
+            <div class="case-head">
+              <span class="case-badge sd">β₄VₐF · phonation</span>
+              <span class="case-title">Same Cₓ · different εₓ at VₐF coordinate</span>
+            </div>
+            <div class="case-body">
+              <div class="eq-block">
+Shared:   Cₓ(RFK) ≈ Cₓ(Kerry)  [same familial β₀]<br><br>
+RFK Jr.:  εₓ(VₐF) large negative  →  x(speech) rapidly declining under load<br>
+Kerry:    εₓ(VₐF) small negative  →  x(speech) compensated, functional<br><br>
+Jacobian: ∂Speech/∂VₐF(RFK) ≫ ∂Speech/∂VₐF(Kerry)<br><br>
+The listener hears the shared Cₓ (family resemblance in voice geometry)<br>
+and the divergent εₓ (one compensated, one not)
+              </div>
+              <p>This case shows the equation at its sharpest: the initial condition is shared (same manifold), the drift terms diverge (different gain-control parameters), and the Jacobian at the VₐF coordinate is what the ear actually detects as family resemblance.</p>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ═══ NOTATION ═══ -->
+      <section class="tab-panel" id="tab-notation">
+
+        <div class="section">
+          <p class="eyebrow">Reference · Notation</p>
+          <h2 class="display">All terms.<br>All forms.</h2>
+          <p class="lede">The clinical twin in code-block ASCII, Jacobian form, and its duality with classical mechanics.</p>
+        </div>
+
+        <div class="section">
+          <h2 class="section-head">Core equation — all forms</h2>
+          <div class="eq-block">
+── Pipeline form ──────────────────────────────────────<br>
+N(t)  →  ∂E/∂t  →  x(t)<br><br>
+── Output equation ────────────────────────────────────<br>
+(E, x)  =  ∫ Eₓ dt  +  εₓ·t  +  Cₓ<br><br>
+── Differential form ──────────────────────────────────<br>
+dx/dt  =  Eₓ  +  εₓ<br><br>
+── Integral solution ──────────────────────────────────<br>
+x(t)  =  x₀  +  ∫₀ᵗ Eₓ(τ) dτ  +  εₓ·t<br><br>
+── FGT residual ───────────────────────────────────────<br>
+ε_FGT  =  x(t)_observed  −  x(t)_modelled<br>
+w_{t+1}  =  w_t  −  γ |ε_FGT|²
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-head">Jacobian forms</h2>
+          <div class="eq-block">
+── Throughput sensitivity ──────────────────────────────<br>
+J_flux  =  ∂(∂E/∂t) / ∂N(t)<br><br>
+── Output sensitivity ──────────────────────────────────<br>
+J_phenotype  =  ∂x(t) / ∂(Eₓ, εₓ, Cₓ)<br><br>
+── Clinical twin comparison ────────────────────────────<br>
+∂Speech/∂VₐF(RFK Jr.)  ≫  ∂Speech/∂VₐF(Kerry)<br><br>
+── System reliability ──────────────────────────────────<br>
+∂x/∂N(t)  ≈  0   when deficiency is severe (decoupling)<br>
+∂x/∂N(t)  &gt; 0   when substrate is limiting (responsive)<br>
+∂x/∂N(t)  &lt; 0   refeeding syndrome (J inverts)
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-head">Duality: mechanics ↔ clinical twin</h2>
+          <div class="duality">
+            <div class="duality-cell head-mech">Mechanical</div>
+            <div class="duality-cell head-clin">Clinical twin</div>
+
+            <div class="duality-cell label-col">Force</div>
+            <div class="duality-cell">Etiology / nutritional input N(t)</div>
+
+            <div class="duality-cell label-col">Power</div>
+            <div class="duality-cell">Metabolic flux ∂E/∂t</div>
+
+            <div class="duality-cell label-col">Position</div>
+            <div class="duality-cell">Phenotype x(t)</div>
+
+            <div class="duality-cell label-col">Velocity</div>
+            <div class="duality-cell">Functional deployment dx/dt</div>
+
+            <div class="duality-cell label-col">Acceleration</div>
+            <div class="duality-cell">Change in reserve d²x/dt²</div>
+
+            <div class="duality-cell label-col">Jerk</div>
+            <div class="duality-cell">Episodic dysregulation (VₐF flare)</div>
+
+            <div class="duality-cell label-col">Initial condition</div>
+            <div class="duality-cell">Constitutional reserve Cₓ = β₀</div>
+
+            <div class="duality-cell label-col">Friction</div>
+            <div class="duality-cell">Drift εₓ (aging, inflammation)</div>
+
+            <div class="duality-cell label-col">Resonance</div>
+            <div class="duality-cell">Oscillatory ε (migraine, SD)</div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-head">Connection to the full Ukubona axiom</h2>
+          <div class="eq-block">
+── β₄VₐF axiom ────────────────────────────────────────<br>
+log(x)_nonself = [β₀ + β₁S]_input<br>
+               + [β₂Vᵢ]_throughput<br>
+               + [β₃VₐS + β₄VₐF]_output<br>
+               + Ω_self<br><br>
+── Clinical twin mapping ───────────────────────────────<br>
+N(t)    ≈  β₀ + β₁S  (nutritional input → skeletal substrate)<br>
+∂E/∂t   ≈  β₂Vᵢ      (metabolic flux → visceral throughput)<br>
+∫Eₓ dt  ≈  β₃VₐS     (accumulated structural work)<br>
+εₓ·t    ≈  β₄VₐF     (drift = gain-control residual)<br>
+Cₓ      ≈  β₀        (constitutional reserve)
+          </div>
+        </div>
+
+        <div class="verdict-block">
+          <div class="verdict-glyph">∫</div>
+          <p style="margin-bottom:1rem;font-size:1rem;color:var(--text0)"><em>The phenotype is not what you are. It is what you have integrated.</em></p>
+          <p>The clinical twin makes one claim: disease is trajectory, not snapshot. Two patients at the same laboratory value can be moving in opposite directions — one with εₓ &gt; 0 recovering, one with εₓ &lt; 0 declining. The equation sees both. The cross-sectional lab value sees neither.</p>
+          <p style="margin-top:1rem; color: var(--text2); font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.04em;">Ukubona LLC · State_t = Σ Event_i · okubona — to see</p>
+        </div>
+
+      </section>
+
+    </div>
+  </main>
+
+  <footer>
+    <div class="outer">
+      <div class="footer-text">Ukubona LLC · Clinical Digital Twin · N(t) → ∂E/∂t → x(t)</div>
+      <div class="footer-text">phenotype = ∫ flux · dt + drift · t + reserve</div>
+    </div>
+  </footer>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const isDark = html.getAttribute('data-theme') === 'dark';
+      html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      document.getElementById('theme-label').textContent = isDark ? 'dark' : 'light';
+    }
+    (function() { document.getElementById('theme-label').textContent = 'light'; })();
+
+    const tabs   = document.querySelectorAll('.tab-btn');
+    const panels = document.querySelectorAll('.tab-panel');
+    function activateTab(id) {
+      tabs.forEach(btn => btn.classList.toggle('active', btn.dataset.tab === id));
+      panels.forEach(p  => p.classList.toggle('active', p.id === 'tab-' + id));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    tabs.forEach(btn => btn.addEventListener('click', () => activateTab(btn.dataset.tab)));
+  </script>
+
+</body>
+</html>
